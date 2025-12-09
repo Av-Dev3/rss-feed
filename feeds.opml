@@ -81,7 +81,7 @@
       <outline text="HealthTech Magazine" type="rss" xmlUrl="https://feeds.feedburner.com/HealthTechMagazine"/>
       <outline text="Hugging Face Blog" type="rss" xmlUrl="https://huggingface.co/blog/feed.xml"/>
       <outline text="IEEE Spectrum – Artificial Intelligence" type="rss" xmlUrl="https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss"/>
-      <outline text="InfoQ – AI, ML & Data Engineering" type="rss" xmlUrl="https://feed.infoq.com/ai-ml-data-eng/"/>
+      <outline text="InfoQ – AI, ML &amp; Data Engineering" type="rss" xmlUrl="https://feed.infoq.com/ai-ml-data-eng/"/>
       <outline text="InfoWorld – Analytics" type="rss" xmlUrl="https://www.infoworld.com/category/analytics/index.rss"/>
       <outline text="InfoWorld – Machine Learning" type="rss" xmlUrl="https://www.infoworld.com/category/machine-learning/index.rss"/>
       <outline text="insideBIGDATA" type="rss" xmlUrl="https://insidebigdata.com/feed"/>
@@ -97,7 +97,7 @@
       <outline text="ZDNet – Big Data" type="rss" xmlUrl="https://www.zdnet.com/topic/big-data/rss.xml"/>
       <outline text="Lightning AI" type="rss" xmlUrl="https://lightning.ai/pages/feed/"/>
       <outline text="Machine Learning (Reddit r/MachineLearning)" type="rss" xmlUrl="https://www.reddit.com/r/MachineLearning"/>
-      <outline text="BMC Machine Learning & Big Data Blog" type="rss" xmlUrl="https://www.bmc.com/blogs/categories/machine-learning-big-data/feed"/>
+      <outline text="BMC Machine Learning &amp; Big Data Blog" type="rss" xmlUrl="https://www.bmc.com/blogs/categories/machine-learning-big-data/feed"/>
       <outline text="CMU ML Blog" type="rss" xmlUrl="https://blog.ml.cmu.edu/feed"/>
       <outline text="Nature – Machine Learning" type="rss" xmlUrl="https://www.nature.com/subjects/machine-learning.rss"/>
       <outline text="Reddit r/machinelearningnews" type="rss" xmlUrl="https://www.reddit.com/r/machinelearningnews"/>
@@ -111,8 +111,8 @@
       <outline text="Neural Interfaces – ScienceDaily" type="rss" xmlUrl="https://www.sciencedaily.com/rss/computers_math/neural_interfaces.xml"/>
       <outline text="Neural Networks (Reddit r/neuralnetworks)" type="rss" xmlUrl="https://www.reddit.com/r/neuralnetworks"/>
       <outline text="New Scientist – Technology" type="rss" xmlUrl="https://www.newscientist.com/subject/technology/feed/"/>
-      <outline text="Phys.org – AI & Machine Learning" type="rss" xmlUrl="https://phys.org/rss-feed/technology-news/machine-learning-ai/"/>
-      <outline text="TechXplore – AI & Machine Learning" type="rss" xmlUrl="https://techxplore.com/rss-feed/machine-learning-ai-news/"/>
+      <outline text="Phys.org – AI &amp; Machine Learning" type="rss" xmlUrl="https://phys.org/rss-feed/technology-news/machine-learning-ai/"/>
+      <outline text="TechXplore – AI &amp; Machine Learning" type="rss" xmlUrl="https://techxplore.com/rss-feed/machine-learning-ai-news/"/>
       <outline text="AssemblyAI Blog" type="rss" xmlUrl="https://www.assemblyai.com/blog/rss/"/>
       <outline text="Nicholas Carlini" type="rss" xmlUrl="https://nicholas.carlini.com/writing/feed.xml"/>
       <outline text="NVIDIA Technical Blog" type="rss" xmlUrl="https://developer.nvidia.com/blog/feed"/>
@@ -173,7 +173,7 @@
       <outline text="VICE – AI topic" type="rss" xmlUrl="https://www.vice.com/en/rss/topic/ai"/>
       <outline text="Visual Studio Magazine – News" type="rss" xmlUrl="https://visualstudiomagazine.com/rss-feeds/news.aspx"/>
       <outline text="Voicebot.ai" type="rss" xmlUrl="https://voicebot.ai/feed/"/>
-      <outline text="Weights & Biases – Fully Connected" type="rss" xmlUrl="https://wandb.ai/fully-connected/rss.xml"/>
+      <outline text="Weights &amp; Biases – Fully Connected" type="rss" xmlUrl="https://wandb.ai/fully-connected/rss.xml"/>
       <outline text="Windows Blog" type="rss" xmlUrl="https://blogs.windows.com/feed"/>
       <outline text="Wolfram Blog" type="rss" xmlUrl="https://blog.wolfram.com/feed"/>
       <outline text="AIhub" type="rss" xmlUrl="https://aihub.org/feed?cat=-473"/>

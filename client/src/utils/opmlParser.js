@@ -5,8 +5,12 @@ export function parseOPML(opmlText) {
     throw new Error('Invalid OPML content');
   }
 
-  // Clean up the text - remove BOM if present
-  const cleanText = opmlText.replace(/^\uFEFF/, '').trim();
+  // Clean up the text - remove BOM if present and fix common XML issues
+  let cleanText = opmlText.replace(/^\uFEFF/, '').trim();
+  
+  // Fix unescaped ampersands in text attributes (common issue)
+  // Replace & with &amp; but only when not already part of an entity
+  cleanText = cleanText.replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;');
   
   if (!cleanText.includes('<opml') && !cleanText.includes('<OPML')) {
     throw new Error('File does not appear to be a valid OPML file');
