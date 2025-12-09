@@ -6,6 +6,8 @@ function ImportOPMLModal({ onClose, onImport }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showTextarea, setShowTextarea] = useState(false);
+  const [opmlText, setOpmlText] = useState('');
   const fileInputRef = useRef(null);
 
   const handleFileSelect = async (e) => {
@@ -52,13 +54,38 @@ function ImportOPMLModal({ onClose, onImport }) {
       const feeds = parseOPML(text);
       const result = await onImport(feeds);
       setSuccess(result);
+      setTimeout(() => onClose(), 2000);
     } catch (err) {
       // If clipboard API fails, show a textarea for manual paste
       if (err.name === 'NotAllowedError' || err.name === 'NotFoundError') {
-        setError('Clipboard access denied. Please use the file upload option or paste OPML content in a text file.');
+        setShowTextarea(true);
+        setError(null);
       } else {
         setError(err.message || 'Failed to import from clipboard');
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTextareaImport = async () => {
+    if (!opmlText.trim()) {
+      setError('Please paste OPML content');
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    try {
+      const { parseOPML } = await import('../utils/opmlParser');
+      const feeds = parseOPML(opmlText);
+      const result = await onImport(feeds);
+      setSuccess(result);
+      setTimeout(() => onClose(), 2000);
+    } catch (err) {
+      setError(err.message || 'Failed to parse OPML content');
     } finally {
       setLoading(false);
     }
@@ -104,15 +131,49 @@ function ImportOPMLModal({ onClose, onImport }) {
             <div className="import-divider">OR</div>
 
             <div className="import-option">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handlePasteOPML}
-                disabled={loading}
-              >
-                📋 Paste from Clipboard
-              </button>
-              <p className="import-hint">Paste OPML content from clipboard</p>
+              {!showTextarea ? (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handlePasteOPML}
+                    disabled={loading}
+                  >
+                    📋 Paste from Clipboard
+                  </button>
+                  <p className="import-hint">Paste OPML content from clipboard</p>
+                </>
+              ) : (
+                <div style={{ width: '100%' }}>
+                  <textarea
+                    value={opmlText}
+                    onChange={(e) => setOpmlText(e.target.value)}
+                    placeholder="Paste your OPML content here..."
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      minHeight: '200px',
+                      padding: '0.75rem',
+                      background: 'var(--bg-tertiary)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '6px',
+                      color: 'var(--text-primary)',
+                      fontFamily: 'monospace',
+                      fontSize: '0.875rem',
+                      resize: 'vertical'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleTextareaImport}
+                    disabled={loading || !opmlText.trim()}
+                    style={{ marginTop: '0.75rem', width: '100%' }}
+                  >
+                    Import from Text
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
