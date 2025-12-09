@@ -17,6 +17,18 @@
   z-index: 10;
 }
 
+.header-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .back-btn {
   background: transparent;
   color: var(--text-primary);
