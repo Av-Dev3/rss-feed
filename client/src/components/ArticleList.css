@@ -56,6 +56,20 @@
   margin-top: 0.5rem;
 }
 
+.loading-progress {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.loading-hint {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .article-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);

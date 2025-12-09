@@ -16,6 +16,7 @@ function App() {
   const [showAddFeed, setShowAddFeed] = useState(false);
   const [showImportOPML, setShowImportOPML] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -56,19 +57,23 @@ function App() {
       }
 
       const allArticles = [];
-      const BATCH_SIZE = 5; // Process 5 feeds at a time
-      const DELAY_BETWEEN_BATCHES = 500; // 500ms delay between batches
+      const BATCH_SIZE = 2; // Process only 2 feeds at a time to avoid rate limits
+      const DELAY_BETWEEN_BATCHES = 2000; // 2 second delay between batches
       
-      // Process feeds in batches to avoid overwhelming the CORS proxy
+      setLoadingProgress({ current: 0, total: feedsToFetch.length });
+      
+      // Process feeds in small batches to avoid overwhelming the CORS proxy
       for (let i = 0; i < feedsToFetch.length; i += BATCH_SIZE) {
         const batch = feedsToFetch.slice(i, i + BATCH_SIZE);
         
         const batchPromises = batch.map(async (feed) => {
           try {
             const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
+            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
             return articles;
           } catch (err) {
             // Silently fail individual feeds - don't spam console
+            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
             return [];
           }
         });
@@ -202,6 +207,7 @@ function App() {
             <ArticleList
               articles={articles}
               loading={loading}
+              loadingProgress={loadingProgress}
               onArticleSelect={handleArticleSelect}
             />
           )}

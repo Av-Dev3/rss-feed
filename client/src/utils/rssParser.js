@@ -67,13 +67,16 @@ function parseRSS(xmlText, feedName, feedId) {
   return articles;
 }
 
-export async function fetchFeedArticles(feedUrl, feedName, feedId) {
+export async function fetchFeedArticles(feedUrl, feedName, feedId, retryCount = 0) {
+  const MAX_RETRIES = 2;
+  const RETRY_DELAY = 3000; // 3 seconds
+  
   try {
     const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
     
     // Add timeout to prevent hanging requests
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(proxyUrl, {
       signal: controller.signal
@@ -82,8 +85,13 @@ export async function fetchFeedArticles(feedUrl, feedName, feedId) {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      // Don't throw for 408 (timeout) or 429 (rate limit) - just return empty
-      if (response.status === 408 || response.status === 429) {
+      // Handle rate limiting with retry
+      if (response.status === 429 && retryCount < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+        return fetchFeedArticles(feedUrl, feedName, feedId, retryCount + 1);
+      }
+      // Don't throw for common errors - just return empty
+      if (response.status === 408 || response.status === 429 || response.status === 500 || response.status === 502) {
         return [];
       }
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -94,6 +102,11 @@ export async function fetchFeedArticles(feedUrl, feedName, feedId) {
     
     return articles;
   } catch (error) {
+    // Retry on network errors if we haven't exceeded max retries
+    if (retryCount < MAX_RETRIES && (error.name === 'TypeError' || error.message.includes('Failed to fetch'))) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+      return fetchFeedArticles(feedUrl, feedName, feedId, retryCount + 1);
+    }
     // Silently handle aborted requests and network errors
     if (error.name === 'AbortError' || error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
       return [];

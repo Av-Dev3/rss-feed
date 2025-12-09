@@ -2,12 +2,18 @@ import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import './ArticleList.css';
 
-function ArticleList({ articles, loading, onArticleSelect }) {
+function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
   if (loading) {
     return (
       <div className="article-list-loading">
         <div className="spinner"></div>
         <p>Loading articles...</p>
+        {loadingProgress && loadingProgress.total > 0 && (
+          <p className="loading-progress">
+            {loadingProgress.current} / {loadingProgress.total} feeds loaded
+          </p>
+        )}
+        <p className="loading-hint">This may take a few minutes for many feeds...</p>
       </div>
     );
   }
