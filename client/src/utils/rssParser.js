@@ -70,9 +70,22 @@ function parseRSS(xmlText, feedName, feedId) {
 export async function fetchFeedArticles(feedUrl, feedName, feedId) {
   try {
     const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
-    const response = await fetch(proxyUrl);
+    
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(proxyUrl, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
+      // Don't throw for 408 (timeout) or 429 (rate limit) - just return empty
+      if (response.status === 408 || response.status === 429) {
+        return [];
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -81,8 +94,12 @@ export async function fetchFeedArticles(feedUrl, feedName, feedId) {
     
     return articles;
   } catch (error) {
-    console.error('Error fetching feed:', error);
-    throw new Error(`Failed to fetch feed: ${error.message}`);
+    // Silently handle aborted requests and network errors
+    if (error.name === 'AbortError' || error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+      return [];
+    }
+    // For other errors, return empty array instead of throwing
+    return [];
   }
 }
 

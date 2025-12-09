@@ -56,24 +56,38 @@ function App() {
       }
 
       const allArticles = [];
+      const BATCH_SIZE = 5; // Process 5 feeds at a time
+      const DELAY_BETWEEN_BATCHES = 500; // 500ms delay between batches
       
-      // Fetch articles from all feeds in parallel
-      const fetchPromises = feedsToFetch.map(async (feed) => {
-        try {
-          const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
-          return articles;
-        } catch (err) {
-          console.error(`Error fetching feed ${feed.name}:`, err);
-          return [];
+      // Process feeds in batches to avoid overwhelming the CORS proxy
+      for (let i = 0; i < feedsToFetch.length; i += BATCH_SIZE) {
+        const batch = feedsToFetch.slice(i, i + BATCH_SIZE);
+        
+        const batchPromises = batch.map(async (feed) => {
+          try {
+            const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
+            return articles;
+          } catch (err) {
+            // Silently fail individual feeds - don't spam console
+            return [];
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(articles => allArticles.push(...articles));
+        
+        // Update articles incrementally so user sees progress
+        const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        setArticles(sortedArticles);
+        
+        // Wait before next batch (except for the last batch)
+        if (i + BATCH_SIZE < feedsToFetch.length) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
         }
-      });
+      }
 
-      const results = await Promise.all(fetchPromises);
-      results.forEach(articles => allArticles.push(...articles));
-
-      // Sort by date (newest first)
+      // Final sort by date (newest first)
       allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      
       setArticles(allArticles);
     } catch (err) {
       setError('Failed to load articles');
