@@ -124,14 +124,29 @@
     position: relative;
     transform: translateX(0);
     padding-top: 0;
+    height: auto;
+  }
+  
+  .sidebar:not(.open) {
+    display: none;
   }
   
   .sidebar.open {
     transform: translateX(0);
+    display: block;
   }
   
   .sidebar-overlay {
     display: none;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+  }
+  
+  .sidebar:not(.open) ~ .main-content {
+    margin-left: 0;
   }
 }
 

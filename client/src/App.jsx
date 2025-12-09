@@ -15,7 +15,7 @@ function App() {
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [showAddFeed, setShowAddFeed] = useState(false);
   const [showImportOPML, setShowImportOPML] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 769);
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
