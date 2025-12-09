@@ -113,7 +113,7 @@ function App() {
           
           // Small delay between feeds to avoid overwhelming the proxy
           if (i < feedsToFetchList.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_FEEDS));
           }
         }
       } else {
