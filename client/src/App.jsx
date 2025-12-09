@@ -176,6 +176,10 @@ function App() {
 
   const handleArticleSelect = (article) => {
     setSelectedArticle(article);
+    // Close saved lists view when article is selected
+    if (showSavedLists) {
+      setShowSavedLists(false);
+    }
   };
 
   const handleSaveArticle = (article) => {

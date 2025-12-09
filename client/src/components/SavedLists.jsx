@@ -26,6 +26,16 @@ function SavedLists({ onArticleSelect, onClose }) {
     }
   };
 
+  const handleArticleSelect = (article) => {
+    // Close saved lists view and show article
+    if (onArticleSelect) {
+      onArticleSelect(article);
+    }
+    if (onClose) {
+      onClose();
+    }
+  };
+
   const selectedListData = lists.find(l => l.id === selectedList?.id);
 
   return (
@@ -84,7 +94,7 @@ function SavedLists({ onArticleSelect, onClose }) {
                   articles={selectedListData.articles}
                   loading={false}
                   loadingProgress={null}
-                  onArticleSelect={onArticleSelect}
+                  onArticleSelect={handleArticleSelect}
                 />
               ) : (
                 <div className="empty-list">
