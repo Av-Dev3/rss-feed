@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import FeedList from './components/FeedList';
 import ArticleList from './components/ArticleList';
 import ArticleViewer from './components/ArticleViewer';
 import AddFeedModal from './components/AddFeedModal';
 import ImportOPMLModal from './components/ImportOPMLModal';
+import SearchBar from './components/SearchBar';
+import TopicFilter from './components/TopicFilter';
 import { getFeeds, addFeed, deleteFeed, addFeedsBulk } from './utils/storage';
 import { fetchFeedArticles } from './utils/rssParser';
 import { getCachedArticles, setCachedArticles, clearCache } from './utils/cache';
@@ -20,6 +22,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState(null);
 
   useEffect(() => {
     loadFeeds();
@@ -156,6 +160,13 @@ function App() {
   const handleFeedSelect = (feedId) => {
     setSelectedFeed(feedId === selectedFeed ? null : feedId);
     setSelectedArticle(null);
+    setSelectedTopic(null); // Clear topic when selecting a feed
+  };
+
+  const handleTopicChange = (topic) => {
+    setSelectedTopic(topic);
+    setSelectedFeed(null); // Clear feed selection when selecting a topic
+    setSelectedArticle(null);
   };
 
   const handleArticleSelect = (article) => {
@@ -178,6 +189,50 @@ function App() {
       throw err;
     }
   };
+
+  // Filter articles based on search query and topic
+  const filteredArticles = useMemo(() => {
+    let filtered = [...articles];
+
+    // Filter by topic (if selected)
+    if (selectedTopic) {
+      // Get feed IDs for the selected topic
+      const topicKeywords = {
+        'AI': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural', 'llm', 'gpt', 'openai', 'anthropic'],
+        'Data Science': ['data science', 'data', 'analytics', 'big data', 'databricks', 'pandas', 'numpy'],
+        'Tech News': ['tech', 'technology', 'news', 'gadget', 'device', 'hardware', 'software'],
+        'Research': ['research', 'arxiv', 'paper', 'academic', 'journal', 'university', 'mit', 'stanford', 'berkeley'],
+        'Programming': ['programming', 'code', 'developer', 'software', 'python', 'javascript', 'react', 'vue'],
+        'Business': ['business', 'venture', 'startup', 'company', 'enterprise', 'corporate'],
+        'Science': ['science', 'physics', 'biology', 'chemistry', 'nature', 'scientific'],
+        'Robotics': ['robot', 'robotics', 'automation', 'autonomous']
+      };
+
+      const keywords = topicKeywords[selectedTopic] || [];
+      filtered = filtered.filter(article => {
+        const feedName = article.feedName?.toLowerCase() || '';
+        return keywords.some(keyword => feedName.includes(keyword));
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(article => {
+        const title = (article.title || '').toLowerCase();
+        const snippet = (article.snippet || '').toLowerCase();
+        const content = (article.content || '').toLowerCase();
+        const feedName = (article.feedName || '').toLowerCase();
+        
+        return title.includes(query) || 
+               snippet.includes(query) || 
+               content.includes(query) ||
+               feedName.includes(query);
+      });
+    }
+
+    return filtered;
+  }, [articles, searchQuery, selectedTopic]);
 
   return (
     <div className="app">
@@ -246,12 +301,25 @@ function App() {
               onBack={() => setSelectedArticle(null)}
             />
           ) : (
-            <ArticleList
-              articles={articles}
-              loading={loading}
-              loadingProgress={loadingProgress}
-              onArticleSelect={handleArticleSelect}
-            />
+            <>
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                articleCount={articles.length}
+                filteredCount={filteredArticles.length}
+              />
+              <TopicFilter
+                feeds={feeds}
+                selectedTopic={selectedTopic}
+                onTopicChange={handleTopicChange}
+              />
+              <ArticleList
+                articles={filteredArticles}
+                loading={loading}
+                loadingProgress={loadingProgress}
+                onArticleSelect={handleArticleSelect}
+              />
+            </>
           )}
         </main>
       </div>
