@@ -52,18 +52,22 @@ export function addFeedsBulk(feedList) {
   const existingUrls = new Set(feeds.map(f => f.url));
   const newFeeds = [];
   const skipped = [];
+  let baseTime = Date.now();
 
-  feedList.forEach(({ url, name }) => {
-    if (!existingUrls.has(url)) {
+  feedList.forEach(({ url, name }, index) => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return; // Skip empty URLs
+    
+    if (!existingUrls.has(trimmedUrl)) {
       newFeeds.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        url: url.trim(),
-        name: (name || url).trim(),
+        id: (baseTime + index).toString() + '-' + Math.random().toString(36).substr(2, 9),
+        url: trimmedUrl,
+        name: (name || trimmedUrl).trim(),
         createdAt: new Date().toISOString()
       });
-      existingUrls.add(url);
+      existingUrls.add(trimmedUrl);
     } else {
-      skipped.push(url);
+      skipped.push(trimmedUrl);
     }
   });
 

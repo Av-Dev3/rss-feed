@@ -18,10 +18,16 @@ function ImportOPMLModal({ onClose, onImport }) {
 
     try {
       const feeds = await importOPMLFile(file);
+      console.log('Parsed feeds:', feeds.length);
       const result = await onImport(feeds);
       setSuccess(result);
+      // Auto-close after 2 seconds on success
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to import OPML file');
+      console.error('Import error:', err);
+      setError(err.message || 'Failed to import OPML file. Please check the file format.');
     } finally {
       setLoading(false);
       if (fileInputRef.current) {
