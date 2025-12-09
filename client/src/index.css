@@ -4,6 +4,13 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
@@ -26,6 +33,12 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
 }
 
 code {
