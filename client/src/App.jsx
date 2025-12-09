@@ -15,6 +15,7 @@ function App() {
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [showAddFeed, setShowAddFeed] = useState(false);
   const [showImportOPML, setShowImportOPML] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
   const [error, setError] = useState(null);
@@ -158,6 +159,13 @@ function App() {
           <h1>📰 RSS Feed Reader</h1>
           <div className="header-actions">
             <button 
+              className="btn btn-secondary" 
+              onClick={() => setShowSidebar(!showSidebar)}
+              title={showSidebar ? "Hide Feeds" : "Show Feeds"}
+            >
+              {showSidebar ? '📂' : '📁'} Feeds
+            </button>
+            <button 
               className="btn btn-primary" 
               onClick={() => setShowAddFeed(true)}
             >
@@ -188,7 +196,7 @@ function App() {
       )}
 
       <div className="app-content">
-        <aside className="sidebar">
+        <aside className={`sidebar ${showSidebar ? 'open' : ''}`}>
           <FeedList
             feeds={feeds}
             selectedFeed={selectedFeed}
@@ -196,6 +204,8 @@ function App() {
             onDeleteFeed={handleDeleteFeed}
           />
         </aside>
+
+        {showSidebar && <div className="sidebar-overlay" onClick={() => setShowSidebar(false)}></div>}
 
         <main className="main-content">
           {selectedArticle ? (
