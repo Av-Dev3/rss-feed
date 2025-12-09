@@ -28,7 +28,12 @@ function ArticleViewer({ article, onBack }) {
         <h1 className="article-viewer-title">{article.title}</h1>
         <div
           className="article-body"
-          dangerouslySetInnerHTML={{ __html: article.content || article.snippet }}
+          dangerouslySetInnerHTML={{ 
+            __html: (article.content || article.snippet).replace(
+              /<img([^>]*)>/gi,
+              '<img$1 onerror="this.style.display=\'none\'">'
+            )
+          }}
         />
       </article>
     </div>

@@ -96,9 +96,21 @@
   margin: 1.5rem 0;
 }
 
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
 .article-body img[src*="404"],
 .article-body img:not([src]) {
   display: none; /* Hide broken images */
+}
+
+/* Hide images that fail to load */
+.article-body img[onerror] {
+  display: none;
 }
 
 .article-body a {
