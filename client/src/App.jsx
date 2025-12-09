@@ -59,8 +59,7 @@ function App() {
       }
 
       const allArticles = [];
-      const BATCH_SIZE = 2; // Process only 2 feeds at a time to avoid rate limits
-      const DELAY_BETWEEN_BATCHES = 2000; // 2 second delay between batches
+      const DELAY_BETWEEN_FEEDS = 1500; // 1.5 second delay between individual feeds
       
       // Separate feeds into cached and uncached
       const feedsToFetchList = [];
@@ -75,12 +74,12 @@ function App() {
         }
       });
       
-      // Add cached articles immediately
+      // Add cached articles immediately and show them right away
       cachedFeeds.forEach(({ articles }) => {
         allArticles.push(...articles);
       });
       
-      // Update UI with cached articles first
+      // Update UI with cached articles immediately
       if (cachedFeeds.length > 0) {
         const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
         setArticles(sortedArticles);
@@ -90,35 +89,30 @@ function App() {
       if (feedsToFetchList.length > 0) {
         setLoadingProgress({ current: 0, total: feedsToFetchList.length });
         
-        // Process feeds in small batches to avoid overwhelming the CORS proxy
-        for (let i = 0; i < feedsToFetchList.length; i += BATCH_SIZE) {
-          const batch = feedsToFetchList.slice(i, i + BATCH_SIZE);
+        // Process feeds one at a time to show articles as they load
+        for (let i = 0; i < feedsToFetchList.length; i++) {
+          const feed = feedsToFetchList[i];
           
-          const batchPromises = batch.map(async (feed) => {
-            try {
-              const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
-              // Cache the articles
-              if (articles && articles.length > 0) {
-                setCachedArticles(feed.id, articles);
-              }
-              setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
-              return articles;
-            } catch (err) {
-              // Silently fail individual feeds - don't spam console
-              setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
-              return [];
+          try {
+            const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
+            
+            // Cache the articles
+            if (articles && articles.length > 0) {
+              setCachedArticles(feed.id, articles);
+              // Add articles immediately and update UI
+              allArticles.push(...articles);
+              const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+              setArticles(sortedArticles);
             }
-          });
-
-          const batchResults = await Promise.all(batchPromises);
-          batchResults.forEach(articles => allArticles.push(...articles));
+            
+            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
+          } catch (err) {
+            // Silently fail individual feeds
+            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
+          }
           
-          // Update articles incrementally so user sees progress
-          const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-          setArticles(sortedArticles);
-          
-          // Wait before next batch (except for the last batch)
-          if (i + BATCH_SIZE < feedsToFetchList.length) {
+          // Small delay between feeds to avoid overwhelming the proxy
+          if (i < feedsToFetchList.length - 1) {
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
           }
         }
