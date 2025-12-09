@@ -96,6 +96,11 @@
   margin: 1.5rem 0;
 }
 
+.article-body img[src*="404"],
+.article-body img:not([src]) {
+  display: none; /* Hide broken images */
+}
+
 .article-body a {
   color: var(--accent);
   text-decoration: underline;

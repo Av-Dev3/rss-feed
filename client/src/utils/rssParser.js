@@ -68,8 +68,8 @@ function parseRSS(xmlText, feedName, feedId) {
 }
 
 export async function fetchFeedArticles(feedUrl, feedName, feedId, retryCount = 0) {
-  const MAX_RETRIES = 2;
-  const RETRY_DELAY = 3000; // 3 seconds
+  const MAX_RETRIES = 1; // Reduced retries to avoid spam
+  const RETRY_DELAY = 5000; // 5 seconds
   
   try {
     const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
@@ -79,22 +79,36 @@ export async function fetchFeedArticles(feedUrl, feedName, feedId, retryCount = 
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(proxyUrl, {
-      signal: controller.signal
+      signal: controller.signal,
+      // Suppress CORS error logging by catching it before it bubbles
+      mode: 'cors'
+    }).catch(err => {
+      // Silently handle CORS and network errors
+      if (err.name === 'TypeError' || err.message?.includes('Failed to fetch') || err.message?.includes('CORS')) {
+        return null; // Return null to indicate failure
+      }
+      throw err;
     });
     
     clearTimeout(timeoutId);
     
+    // If fetch failed (CORS error, etc.)
+    if (!response) {
+      return [];
+    }
+    
     if (!response.ok) {
-      // Handle rate limiting with retry
+      // Handle rate limiting with retry (but only once)
       if (response.status === 429 && retryCount < MAX_RETRIES) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         return fetchFeedArticles(feedUrl, feedName, feedId, retryCount + 1);
       }
       // Don't throw for common errors - just return empty
       if (response.status === 408 || response.status === 429 || response.status === 500 || response.status === 502) {
         return [];
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // For other errors, return empty
+      return [];
     }
 
     const xmlText = await response.text();
@@ -102,16 +116,8 @@ export async function fetchFeedArticles(feedUrl, feedName, feedId, retryCount = 
     
     return articles;
   } catch (error) {
-    // Retry on network errors if we haven't exceeded max retries
-    if (retryCount < MAX_RETRIES && (error.name === 'TypeError' || error.message.includes('Failed to fetch'))) {
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
-      return fetchFeedArticles(feedUrl, feedName, feedId, retryCount + 1);
-    }
-    // Silently handle aborted requests and network errors
-    if (error.name === 'AbortError' || error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
-      return [];
-    }
-    // For other errors, return empty array instead of throwing
+    // Silently handle all errors - don't retry, just return empty
+    // This prevents console spam from CORS/rate limit errors
     return [];
   }
 }
