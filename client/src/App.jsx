@@ -6,6 +6,8 @@ import AddFeedModal from './components/AddFeedModal';
 import ImportOPMLModal from './components/ImportOPMLModal';
 import SearchBar from './components/SearchBar';
 import TopicFilter from './components/TopicFilter';
+import SaveToListModal from './components/SaveToListModal';
+import SavedLists from './components/SavedLists';
 import { getFeeds, addFeed, deleteFeed, addFeedsBulk } from './utils/storage';
 import { fetchFeedArticles } from './utils/rssParser';
 import { getCachedArticles, setCachedArticles, clearCache } from './utils/cache';
@@ -24,6 +26,9 @@ function App() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [articleToSave, setArticleToSave] = useState(null);
+  const [showSavedLists, setShowSavedLists] = useState(false);
 
   useEffect(() => {
     loadFeeds();
@@ -173,6 +178,16 @@ function App() {
     setSelectedArticle(article);
   };
 
+  const handleSaveArticle = (article) => {
+    setArticleToSave(article);
+    setShowSaveModal(true);
+  };
+
+  const handleSaveComplete = () => {
+    // Refresh any saved lists view if open
+    // This could trigger a re-render if needed
+  };
+
   const handleRefresh = () => {
     loadArticles();
   };
@@ -271,6 +286,13 @@ function App() {
             >
               🔄 Refresh
             </button>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setShowSavedLists(true)}
+              title="View saved lists"
+            >
+              📚 Saved Lists
+            </button>
           </div>
         </div>
       </header>
@@ -295,10 +317,16 @@ function App() {
         {showSidebar && <div className="sidebar-overlay" onClick={() => setShowSidebar(false)}></div>}
 
         <main className="main-content">
-          {selectedArticle ? (
+          {showSavedLists ? (
+            <SavedLists
+              onArticleSelect={handleArticleSelect}
+              onClose={() => setShowSavedLists(false)}
+            />
+          ) : selectedArticle ? (
             <ArticleViewer
               article={selectedArticle}
               onBack={() => setSelectedArticle(null)}
+              onSaveArticle={handleSaveArticle}
             />
           ) : (
             <>
@@ -318,6 +346,7 @@ function App() {
                 loading={loading}
                 loadingProgress={loadingProgress}
                 onArticleSelect={handleArticleSelect}
+                onSaveArticle={handleSaveArticle}
               />
             </>
           )}
@@ -335,6 +364,17 @@ function App() {
         <ImportOPMLModal
           onClose={() => setShowImportOPML(false)}
           onImport={handleImportOPML}
+        />
+      )}
+
+      {showSaveModal && articleToSave && (
+        <SaveToListModal
+          article={articleToSave}
+          onClose={() => {
+            setShowSaveModal(false);
+            setArticleToSave(null);
+          }}
+          onSave={handleSaveComplete}
         />
       )}
     </div>

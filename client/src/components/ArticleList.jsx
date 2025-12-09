@@ -2,7 +2,7 @@ import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import './ArticleList.css';
 
-function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
+function ArticleList({ articles, loading, loadingProgress, onArticleSelect, onSaveArticle }) {
   // Show loading only if we have no articles yet
   if (loading && articles.length === 0) {
     return (
@@ -57,15 +57,29 @@ function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
               <time className="article-date">
                 {formatDistanceToNow(new Date(article.pubDate), { addSuffix: true })}
               </time>
-              <a
-                href={article.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="article-link"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Open →
-              </a>
+              <div className="article-actions">
+                {onSaveArticle && (
+                  <button
+                    className="save-article-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSaveArticle(article);
+                    }}
+                    title="Save to list"
+                  >
+                    💾 Save
+                  </button>
+                )}
+                <a
+                  href={article.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="article-link"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Open →
+                </a>
+              </div>
             </div>
           </article>
         ))}

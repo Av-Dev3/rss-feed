@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { fetchArticleContent } from '../utils/articleFetcher';
 import './ArticleViewer.css';
 
-function ArticleViewer({ article, onBack }) {
+function ArticleViewer({ article, onBack, onSaveArticle }) {
   const [fullContent, setFullContent] = useState(null);
   const [loadingContent, setLoadingContent] = useState(false);
   const [useFullContent, setUseFullContent] = useState(false);
@@ -45,6 +45,15 @@ function ArticleViewer({ article, onBack }) {
         <div className="header-actions-right">
           {loadingContent && (
             <span className="loading-text">Loading full article...</span>
+          )}
+          {onSaveArticle && (
+            <button
+              className="save-article-btn-header"
+              onClick={() => onSaveArticle(article)}
+              title="Save to list"
+            >
+              💾 Save to List
+            </button>
           )}
           <a
             href={article.link}

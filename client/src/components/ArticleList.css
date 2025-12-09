@@ -155,6 +155,28 @@
   align-items: center;
 }
 
+.article-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.save-article-btn {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-article-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
 .article-date {
   font-size: 0.875rem;
   color: var(--text-secondary);

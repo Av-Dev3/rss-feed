@@ -29,6 +29,23 @@
   font-style: italic;
 }
 
+.save-article-btn-header {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 0.75rem;
+}
+
+.save-article-btn-header:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
 .back-btn {
   background: transparent;
   color: var(--text-primary);
