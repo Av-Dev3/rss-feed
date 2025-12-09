@@ -3,7 +3,8 @@ import { formatDistanceToNow } from 'date-fns';
 import './ArticleList.css';
 
 function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
-  if (loading) {
+  // Show loading only if we have no articles yet
+  if (loading && articles.length === 0) {
     return (
       <div className="article-list-loading">
         <div className="spinner"></div>
@@ -18,7 +19,7 @@ function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
     );
   }
 
-  if (articles.length === 0) {
+  if (!loading && articles.length === 0) {
     return (
       <div className="article-list-empty">
         <p>No articles found</p>
@@ -31,6 +32,12 @@ function ArticleList({ articles, loading, loadingProgress, onArticleSelect }) {
     <div className="article-list">
       <div className="article-list-header">
         <h2>Articles ({articles.length})</h2>
+        {loading && loadingProgress && loadingProgress.total > 0 && (
+          <div className="loading-indicator">
+            <span className="loading-dot"></span>
+            <span>Loading {loadingProgress.current} / {loadingProgress.total} feeds...</span>
+          </div>
+        )}
       </div>
       <div className="article-list-content">
         {articles.map(article => (
