@@ -1,0 +1,114 @@
+.import-modal {
+  max-width: 600px;
+}
+
+.import-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.import-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.import-option:hover {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.file-label {
+  cursor: pointer;
+  width: 100%;
+}
+
+.file-input-button {
+  padding: 1rem 2rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.file-input-button:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.import-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.import-divider {
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 500;
+  position: relative;
+}
+
+.import-divider::before,
+.import-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--border);
+}
+
+.import-divider::before {
+  left: 0;
+}
+
+.import-divider::after {
+  right: 0;
+}
+
+.import-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  color: var(--text-secondary);
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.form-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+

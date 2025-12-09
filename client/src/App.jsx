@@ -3,7 +3,8 @@ import FeedList from './components/FeedList';
 import ArticleList from './components/ArticleList';
 import ArticleViewer from './components/ArticleViewer';
 import AddFeedModal from './components/AddFeedModal';
-import { getFeeds, addFeed, deleteFeed } from './utils/storage';
+import ImportOPMLModal from './components/ImportOPMLModal';
+import { getFeeds, addFeed, deleteFeed, addFeedsBulk } from './utils/storage';
 import { fetchFeedArticles } from './utils/rssParser';
 import './App.css';
 
@@ -13,6 +14,7 @@ function App() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [showAddFeed, setShowAddFeed] = useState(false);
+  const [showImportOPML, setShowImportOPML] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -117,6 +119,19 @@ function App() {
     loadArticles();
   };
 
+  const handleImportOPML = async (feeds) => {
+    try {
+      const result = addFeedsBulk(feeds);
+      loadFeeds();
+      setShowImportOPML(false);
+      setError(null);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -128,6 +143,12 @@ function App() {
               onClick={() => setShowAddFeed(true)}
             >
               + Add Feed
+            </button>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setShowImportOPML(true)}
+            >
+              📥 Import OPML
             </button>
             <button 
               className="btn btn-secondary" 
@@ -177,6 +198,13 @@ function App() {
         <AddFeedModal
           onClose={() => setShowAddFeed(false)}
           onAdd={handleAddFeed}
+        />
+      )}
+
+      {showImportOPML && (
+        <ImportOPMLModal
+          onClose={() => setShowImportOPML(false)}
+          onImport={handleImportOPML}
         />
       )}
     </div>

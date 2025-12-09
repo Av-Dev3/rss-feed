@@ -47,3 +47,35 @@ export function deleteFeed(id) {
   saveFeeds(filteredFeeds);
 }
 
+export function addFeedsBulk(feedList) {
+  const feeds = getFeeds();
+  const existingUrls = new Set(feeds.map(f => f.url));
+  const newFeeds = [];
+  const skipped = [];
+
+  feedList.forEach(({ url, name }) => {
+    if (!existingUrls.has(url)) {
+      newFeeds.push({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        url: url.trim(),
+        name: (name || url).trim(),
+        createdAt: new Date().toISOString()
+      });
+      existingUrls.add(url);
+    } else {
+      skipped.push(url);
+    }
+  });
+
+  if (newFeeds.length > 0) {
+    feeds.push(...newFeeds);
+    saveFeeds(feeds);
+  }
+
+  return {
+    added: newFeeds.length,
+    skipped: skipped.length,
+    total: feedList.length
+  };
+}
+
