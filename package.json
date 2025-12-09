@@ -1,0 +1,13 @@
+{
+  "name": "rss-feed-reader",
+  "version": "1.0.0",
+  "description": "Modern RSS feed reader",
+  "type": "module",
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "install:all": "cd client && npm install",
+    "preview": "cd client && npm run preview"
+  }
+}
+
