@@ -58,7 +58,6 @@ function App() {
         return;
       }
 
-      const allArticles = [];
       const DELAY_BETWEEN_FEEDS = 1500; // 1.5 second delay between individual feeds
       
       // Separate feeds into cached and uncached
@@ -74,14 +73,15 @@ function App() {
         }
       });
       
-      // Add cached articles immediately and show them right away
+      // Start with cached articles
+      let currentArticles = [];
       cachedFeeds.forEach(({ articles }) => {
-        allArticles.push(...articles);
+        currentArticles.push(...articles);
       });
       
       // Update UI with cached articles immediately
       if (cachedFeeds.length > 0) {
-        const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+        const sortedArticles = [...currentArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
         setArticles(sortedArticles);
       }
       
@@ -99,10 +99,11 @@ function App() {
             // Cache the articles
             if (articles && articles.length > 0) {
               setCachedArticles(feed.id, articles);
-              // Add articles immediately and update UI
-              allArticles.push(...articles);
-              const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-              setArticles(sortedArticles);
+              // Add articles immediately and update UI using functional update
+              setArticles(prevArticles => {
+                const combined = [...prevArticles, ...articles];
+                return combined.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+              });
             }
             
             setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
@@ -120,10 +121,6 @@ function App() {
         // All feeds were cached, no loading needed
         setLoading(false);
       }
-
-      // Final sort by date (newest first)
-      allArticles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-      setArticles(allArticles);
     } catch (err) {
       setError('Failed to load articles');
       console.error(err);
