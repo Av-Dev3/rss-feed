@@ -6,6 +6,7 @@ import AddFeedModal from './components/AddFeedModal';
 import ImportOPMLModal from './components/ImportOPMLModal';
 import { getFeeds, addFeed, deleteFeed, addFeedsBulk } from './utils/storage';
 import { fetchFeedArticles } from './utils/rssParser';
+import { getCachedArticles, setCachedArticles, clearCache } from './utils/cache';
 import './App.css';
 
 function App() {
@@ -61,35 +62,69 @@ function App() {
       const BATCH_SIZE = 2; // Process only 2 feeds at a time to avoid rate limits
       const DELAY_BETWEEN_BATCHES = 2000; // 2 second delay between batches
       
-      setLoadingProgress({ current: 0, total: feedsToFetch.length });
+      // Separate feeds into cached and uncached
+      const feedsToFetchList = [];
+      const cachedFeeds = [];
       
-      // Process feeds in small batches to avoid overwhelming the CORS proxy
-      for (let i = 0; i < feedsToFetch.length; i += BATCH_SIZE) {
-        const batch = feedsToFetch.slice(i, i + BATCH_SIZE);
-        
-        const batchPromises = batch.map(async (feed) => {
-          try {
-            const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
-            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
-            return articles;
-          } catch (err) {
-            // Silently fail individual feeds - don't spam console
-            setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
-            return [];
-          }
-        });
-
-        const batchResults = await Promise.all(batchPromises);
-        batchResults.forEach(articles => allArticles.push(...articles));
-        
-        // Update articles incrementally so user sees progress
+      feedsToFetch.forEach(feed => {
+        const cached = getCachedArticles(feed.id);
+        if (cached && cached.length > 0) {
+          cachedFeeds.push({ feed, articles: cached });
+        } else {
+          feedsToFetchList.push(feed);
+        }
+      });
+      
+      // Add cached articles immediately
+      cachedFeeds.forEach(({ articles }) => {
+        allArticles.push(...articles);
+      });
+      
+      // Update UI with cached articles first
+      if (cachedFeeds.length > 0) {
         const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
         setArticles(sortedArticles);
+      }
+      
+      // Only fetch feeds that aren't cached or are stale
+      if (feedsToFetchList.length > 0) {
+        setLoadingProgress({ current: 0, total: feedsToFetchList.length });
         
-        // Wait before next batch (except for the last batch)
-        if (i + BATCH_SIZE < feedsToFetch.length) {
-          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        // Process feeds in small batches to avoid overwhelming the CORS proxy
+        for (let i = 0; i < feedsToFetchList.length; i += BATCH_SIZE) {
+          const batch = feedsToFetchList.slice(i, i + BATCH_SIZE);
+          
+          const batchPromises = batch.map(async (feed) => {
+            try {
+              const articles = await fetchFeedArticles(feed.url, feed.name, feed.id);
+              // Cache the articles
+              if (articles && articles.length > 0) {
+                setCachedArticles(feed.id, articles);
+              }
+              setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
+              return articles;
+            } catch (err) {
+              // Silently fail individual feeds - don't spam console
+              setLoadingProgress(prev => ({ ...prev, current: prev.current + 1 }));
+              return [];
+            }
+          });
+
+          const batchResults = await Promise.all(batchPromises);
+          batchResults.forEach(articles => allArticles.push(...articles));
+          
+          // Update articles incrementally so user sees progress
+          const sortedArticles = [...allArticles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+          setArticles(sortedArticles);
+          
+          // Wait before next batch (except for the last batch)
+          if (i + BATCH_SIZE < feedsToFetchList.length) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+          }
         }
+      } else {
+        // All feeds were cached, no loading needed
+        setLoading(false);
       }
 
       // Final sort by date (newest first)
@@ -117,6 +152,7 @@ function App() {
   const handleDeleteFeed = (id) => {
     try {
       deleteFeed(id);
+      clearCache(id); // Clear cache when feed is deleted
       loadFeeds();
       if (selectedFeed === id) {
         setSelectedFeed(null);
@@ -179,8 +215,13 @@ function App() {
             </button>
             <button 
               className="btn btn-secondary" 
-              onClick={handleRefresh}
+              onClick={() => {
+                // Clear cache and refresh
+                feeds.forEach(feed => clearCache(feed.id));
+                handleRefresh();
+              }}
               disabled={loading}
+              title="Clear cache and refresh all feeds"
             >
               🔄 Refresh
             </button>
