@@ -39,8 +39,8 @@ jobs:
           cd client
           npm run build
         env:
-          # Replace 'rss_feed_site' with your actual repository name
-          VITE_BASE_PATH: /rss_feed_site/
+          # Automatically uses repository name - no need to change!
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
